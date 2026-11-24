@@ -1,8 +1,12 @@
 import React from 'react';
-import { ArrowUp, Github, Linkedin, Mail } from 'lucide-react';
+import { ArrowUp, Github, Linkedin, Lock, Mail } from 'lucide-react';
 import { PERSONAL_INFO } from '../../data/portfolioData';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenMessages?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenMessages }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -49,6 +53,20 @@ export const Footer: React.FC = () => {
           >
             <Mail className="w-3.5 h-3.5" />
             Email
+          </a>
+          <span className="text-zinc-700">|</span>
+          <a
+            href="/messages"
+            onClick={(e) => {
+              if (onOpenMessages) {
+                e.preventDefault();
+                onOpenMessages();
+              }
+            }}
+            className="hover:text-[#10b981] transition-colors flex items-center gap-1.5"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            Messages
           </a>
         </div>
 

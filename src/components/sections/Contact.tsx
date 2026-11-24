@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle2, AlertCircle, Copy, Check, Github, Linkedin, MapPin } from 'lucide-react';
 import { PERSONAL_INFO } from '../../data/portfolioData';
+import { submitContactMessage } from '../../lib/api';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export const Contact: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -25,7 +27,7 @@ export const Contact: React.FC = () => {
       errs.email = 'Please provide a valid email address';
     }
     if (!formData.subject.trim()) errs.subject = 'Please provide a subject';
-    if (!formData.message.trim() || formData.message.length < 10) {
+    if (!formData.message.trim() || formData.message.trim().length < 10) {
       errs.message = 'Please enter a message of at least 10 characters';
     }
     return errs;
@@ -33,35 +35,29 @@ export const Contact: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
     const validationErrors = validate();
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
       try {
-        const apiUrl = PERSONAL_INFO.contactApi || 'https://premnanda-api.vercel.app/contact';
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            subject: formData.subject,
-            message: formData.message,
-          }),
+        await submitContactMessage({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
         });
-
-        if (!response.ok) {
-          // If the backend returned an error status, log it but still deliver graceful state or notice
-          console.warn('Contact API response not OK, fallback delivered:', response.status);
-        }
-      } catch (err) {
-        // Network or CORS error fallback
-        console.warn('API submission failed or offline, fallback activated:', err);
-      } finally {
-        setIsSubmitting(false);
         setIsSuccess(true);
         setFormData({ name: '', email: '', subject: '', message: '' });
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error
+            ? err.message
+            : 'Unable to send message right now. Please try again or email directly.'
+        );
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -206,7 +202,7 @@ export const Contact: React.FC = () => {
                     <input
                       id="name"
                       type="text"
-                      placeholder="e.g. Alex Sharma"
+                      placeholder="e.g. Your Name"
                       value={formData.name}
                       onChange={(e) => {
                         setFormData({ ...formData, name: e.target.value });
@@ -234,7 +230,7 @@ export const Contact: React.FC = () => {
                     <input
                       id="email"
                       type="email"
-                      placeholder="alex@company.com"
+                      placeholder="abc@gmail.com"
                       value={formData.email}
                       onChange={(e) => {
                         setFormData({ ...formData, email: e.target.value });
@@ -310,6 +306,14 @@ export const Contact: React.FC = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Submit Error */}
+                {submitError && (
+                  <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs font-mono text-red-300 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
 
                 {/* Submit CTA */}
                 <div className="pt-2">

@@ -10,7 +10,7 @@ export const PERSONAL_INFO = {
   email: 'premnanda532@gmail.com',
   github: 'https://github.com/Prem024',
   linkedin: 'https://www.linkedin.com/in/prem-nanda/',
-  contactApi: 'https://premnanda-api.vercel.app/contact',
+  contactApi: '/api/contact',
   resumeUrl: '/Prem_Nanda_Resume.pdf',
   availability: 'Available for freelance opportunities',
   status: 'Currently working as a developer',
